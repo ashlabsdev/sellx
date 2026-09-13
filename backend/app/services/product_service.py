@@ -5,10 +5,12 @@ from sqlalchemy.orm import Session
 from app.models.product import Product
 from app.repositories.product_repository import (
     create_product,
+    delete_product,
     get_product,
     get_products,
+    update_product,
 )
-from app.schemas.product import ProductCreate
+from app.schemas.product import ProductCreate, ProductUpdate
 
 
 def list_products(db: Session) -> list[Product]:
@@ -45,3 +47,35 @@ def add_product(
     )
 
     return create_product(db, product)
+
+
+def edit_product(
+    db: Session,
+    product: Product,
+    data: ProductUpdate,
+) -> Product:
+    product.name = data.name
+    product.category_id = data.category_id
+    product.description = data.description
+    product.price = data.price
+    product.condition = data.condition
+    product.location = data.location
+    product.contact_phone = data.contact_phone
+    product.status = data.status
+
+    product.slug = (
+        data.name.strip()
+        .lower()
+        .replace(" ", "-")
+    )
+
+    product.updated_at = datetime.now(timezone.utc)
+
+    return update_product(db, product)
+
+
+def remove_product(
+    db: Session,
+    product: Product,
+) -> None:
+    delete_product(db, product)

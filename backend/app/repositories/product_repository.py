@@ -27,3 +27,21 @@ def create_product(
     db.refresh(product)
 
     return product
+
+
+def update_product(
+    db: Session,
+    product: Product,
+) -> Product:
+    db.commit()
+    db.refresh(product)
+
+    return product
+
+
+def delete_product(
+    db: Session,
+    product: Product,
+) -> None:
+    db.delete(product)
+    db.commit()
