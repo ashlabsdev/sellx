@@ -2,21 +2,40 @@ from sqlalchemy.orm import Session
 
 from app.models.product import Product
 
-
-def get_products(db: Session) -> list[Product]:
-    return db.query(Product).all()
-
-
-def get_product(
+def get_products(
     db: Session,
-    product_id: int,
+    search: str | None = None,
+    category_id: int | None = None,
+    status: str | None = None,
+) -> list[Product]:
+    query = db.query(Product)
+
+    if search:
+        query = query.filter(
+            Product.name.ilike(f"%{search}%")
+        )
+
+    if category_id is not None:
+        query = query.filter(
+            Product.category_id == category_id
+        )
+
+    if status:
+        query = query.filter(
+            Product.status == status
+        )
+
+    return query.all()
+
+def get_product_by_slug(
+    db: Session,
+    slug: str,
 ) -> Product | None:
     return (
         db.query(Product)
-        .filter(Product.id == product_id)
+        .filter(Product.slug == slug)
         .first()
     )
-
 
 def create_product(
     db: Session,

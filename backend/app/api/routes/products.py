@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -21,16 +21,30 @@ router = APIRouter(
     tags=["Products"],
 )
 
-
 @router.get(
     "",
     response_model=list[ProductResponse],
 )
+
 def get_products(
+    search: str | None = Query(
+        default=None,
+        min_length=1,
+    ),
+    category_id: int | None = Query(
+        default=None,
+    ),
+    status: str | None = Query(
+        default=None,
+    ),
     db: Session = Depends(get_db),
 ):
-    return list_products(db)
-
+    return list_products(
+        db,
+        search=search,
+        category_id=category_id,
+        status=status,
+    )
 
 @router.get(
     "/{product_id}",
