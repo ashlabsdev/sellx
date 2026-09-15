@@ -7,6 +7,7 @@ from app.models.product import Product
 from app.repositories.product_repository import (
     create_product,
     delete_product,
+    get_product,
     get_product_by_slug,
     get_products,
     update_product,
@@ -55,7 +56,6 @@ def list_products(
         category_id=category_id,
         status=status,
     )
-
 
 def get_product_by_id(
     db: Session,
