@@ -49,12 +49,16 @@ def list_products(
     search: str | None = None,
     category_id: int | None = None,
     status: str | None = None,
+    page: int = 1,
+    page_size: int = 12,
 ) -> list[Product]:
     return get_products(
         db,
         search=search,
         category_id=category_id,
         status=status,
+        page=page,
+        page_size=page_size,
     )
 
 def get_product_by_id(

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-
+from sqlalchemy import desc
 from app.models.product import Product
 
 def get_products(
@@ -7,6 +7,8 @@ def get_products(
     search: str | None = None,
     category_id: int | None = None,
     status: str | None = None,
+    page: int = 1,
+    page_size: int = 12,
 ) -> list[Product]:
     query = db.query(Product)
 
@@ -25,7 +27,18 @@ def get_products(
             Product.status == status
         )
 
-    return query.all()
+    query = query.order_by(
+        desc(Product.created_at)
+    )
+
+    offset = (page - 1) * page_size
+
+    return (
+        query
+        .offset(offset)
+        .limit(page_size)
+        .all()
+    )
 
 def get_product_by_slug(
     db: Session,

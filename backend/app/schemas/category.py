@@ -12,6 +12,16 @@ class CategoryUpdate(BaseModel):
     is_active: bool
 
 
+class CategorySummary(BaseModel):
+    id: int
+    name: str
+    slug: str
+
+    model_config = {
+        "from_attributes": True
+    }
+
+
 class CategoryResponse(BaseModel):
     id: int
     name: str

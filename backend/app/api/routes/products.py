@@ -25,18 +25,19 @@ router = APIRouter(
     "",
     response_model=list[ProductResponse],
 )
-
 def get_products(
-    search: str | None = Query(
-        default=None,
-        min_length=1,
+    page: int = Query(
+        default=1,
+        ge=1,
     ),
-    category_id: int | None = Query(
-        default=None,
+    page_size: int = Query(
+        default=12,
+        ge=1,
+        le=100,
     ),
-    status: str | None = Query(
-        default=None,
-    ),
+    search: str | None = None,
+    category_id: int | None = None,
+    status: str | None = None,
     db: Session = Depends(get_db),
 ):
     return list_products(
@@ -44,6 +45,8 @@ def get_products(
         search=search,
         category_id=category_id,
         status=status,
+        page=page,
+        page_size=page_size,
     )
 
 @router.get(

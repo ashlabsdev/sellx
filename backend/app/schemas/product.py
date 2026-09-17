@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from app.schemas.category import CategorySummary
+
 
 class ProductCreate(BaseModel):
     name: str
@@ -26,6 +28,7 @@ class ProductResponse(ProductCreate):
     id: int
     slug: str
     status: str
+    category: CategorySummary | None = None
 
     model_config = {
         "from_attributes": True
