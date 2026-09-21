@@ -70,3 +70,19 @@ async def upload_product_image(
             status_code=500,
             detail="Failed to upload image",
         ) from exc
+
+def delete_product_image_file(
+    storage_path: str,
+) -> None:
+    try:
+        supabase.storage.from_(
+            SUPABASE_STORAGE_BUCKET
+        ).remove(
+            [storage_path]
+        )
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete image from storage",
+        ) from exc
