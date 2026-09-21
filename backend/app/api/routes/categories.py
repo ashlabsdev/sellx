@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.security import get_current_admin
+from app.models.admin import Admin
+
 from app.core.database import get_db
 from app.schemas.category import (
     CategoryCreate,
@@ -61,6 +64,9 @@ def get_category(
 def create_category(
     data: CategoryCreate,
     db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
 ):
     return add_category(
         db,
@@ -76,6 +82,9 @@ def update_category(
     category_id: int,
     data: CategoryUpdate,
     db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
 ):
     category = get_category_by_id(
         db,
@@ -101,6 +110,9 @@ def update_category(
 def delete_category(
     category_id: int,
     db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
 ):
     category = get_category_by_id(
         db,

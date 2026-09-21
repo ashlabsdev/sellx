@@ -7,6 +7,9 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.core.security import get_current_admin
+from app.models.admin import Admin
+
 from app.core.database import get_db
 from app.schemas.product_image import ProductImageResponse
 from app.services.product_image_service import (
@@ -52,6 +55,9 @@ def create_image(
     display_order: int = 0,
     is_primary: bool = False,
     db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
 ):
     return add_product_image(
         db,
@@ -70,6 +76,9 @@ def delete_image(
     product_id: int,
     image_id: int,
     db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
 ):
     image = get_product_image_by_id(
         db,
@@ -102,6 +111,9 @@ async def upload_image(
     display_order: int = Form(0),
     is_primary: bool = Form(False),
     db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
 ):
     storage_path, image_url = await upload_product_image(
         product_id=product_id,
@@ -116,6 +128,8 @@ async def upload_image(
         display_order=display_order,
         is_primary=is_primary,
     )
+
+
 @router.post(
     "/upload-multiple",
     response_model=list[ProductImageResponse],
@@ -124,6 +138,9 @@ async def upload_multiple_images(
     product_id: int,
     files: list[UploadFile] = File(...),
     db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
 ):
     uploaded_images = []
 
@@ -166,6 +183,9 @@ def update_image(
     display_order: int = 0,
     is_primary: bool = False,
     db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
 ):
     return edit_product_image(
         db,
