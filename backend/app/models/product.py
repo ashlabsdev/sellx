@@ -4,6 +4,7 @@ from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.product_image import ProductImage
 
 
 class Product(Base):
@@ -23,6 +24,12 @@ class Product(Base):
     category: Mapped["Category | None"] = relationship(
         "Category",
         back_populates="products",
+    )
+
+    images: Mapped[list["ProductImage"]] = relationship(
+    "ProductImage",
+    back_populates="product",
+    cascade="all, delete-orphan",
     )
 
     name: Mapped[str] = mapped_column(

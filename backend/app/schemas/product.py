@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.schemas.category import CategorySummary
-
+from app.schemas.product_image import ProductImageResponse
 
 class ProductCreate(BaseModel):
     name: str
@@ -29,6 +29,9 @@ class ProductResponse(ProductCreate):
     slug: str
     status: str
     category: CategorySummary | None = None
+    images: list[ProductImageResponse] = Field(
+        default_factory=list
+    )
 
     model_config = {
         "from_attributes": True
