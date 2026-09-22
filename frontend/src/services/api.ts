@@ -9,6 +9,7 @@ import { getToken } from './auth'
 import type {
   Product,
   ProductCreate,
+  ProductImage,
   ProductUpdate,
 } from '../types/product'
 
@@ -16,8 +17,89 @@ import type {
   Category,
 } from '../types/category'
 
-const API_BASE_URL =
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ||
   'http://127.0.0.1:8000'
+).replace(/\/+$/, '')
+
+export async function getProductImages(
+  productId: number,
+) {
+  return request<ProductImage[]>(
+    `/api/products/${productId}/images`,
+  )
+}
+
+export async function reorderProductImages(
+  productId: number,
+  imageIds: number[],
+) {
+  return request<ProductImage[]>(
+    `/api/products/${productId}/images/reorder`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        image_ids: imageIds,
+      }),
+    },
+    true,
+  )
+}
+
+export async function uploadProductImages(
+  productId: number,
+  files: File[],
+) {
+  const formData = new FormData()
+
+  for (const file of files) {
+    formData.append('files', file)
+  }
+
+  return request<ProductImage[]>(
+    `/api/products/${productId}/images/upload-multiple`,
+    {
+      method: 'POST',
+      body: formData,
+    },
+    true,
+  )
+}
+
+
+export async function updateProductImage(
+  productId: number,
+  imageId: number,
+  data: {
+    display_order?: number
+    is_primary?: boolean
+  },
+) {
+  return request<ProductImage>(
+    `/api/products/${productId}/images/${imageId}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    },
+    true,
+  )
+}
+
+
+export async function deleteProductImage(
+  productId: number,
+  imageId: number,
+) {
+  return request<{
+    message: string
+  }>(
+    `/api/products/${productId}/images/${imageId}`,
+    {
+      method: 'DELETE',
+    },
+    true,
+  )
+}
 
 
 async function request<T>(

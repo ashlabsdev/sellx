@@ -3,6 +3,21 @@ from sqlalchemy.orm import Session
 from app.models.product_image import ProductImage
 
 
+def reorder_product_images(
+    db: Session,
+    images: list[ProductImage],
+) -> list[ProductImage]:
+    for display_order, image in enumerate(images):
+        image.display_order = display_order
+
+    db.commit()
+
+    for image in images:
+        db.refresh(image)
+
+    return images
+
+
 def get_product_images(
     db: Session,
     product_id: int,

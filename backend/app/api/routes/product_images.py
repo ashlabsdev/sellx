@@ -10,15 +10,23 @@ from sqlalchemy.orm import Session
 from app.core.security import get_current_admin
 from app.models.admin import Admin
 
+from app.schemas.product_image import (
+    ProductImageReorder,
+    ProductImageResponse,
+    ProductImageUpdate,
+)
+
 from app.core.database import get_db
-from app.schemas.product_image import ProductImageResponse
+
 from app.services.product_image_service import (
     add_product_image,
     edit_product_image,
     get_product_image_by_id,
     list_product_images,
     remove_product_image,
+    reorder_images,
 )
+
 from app.services.storage_service import (
     delete_product_image_file,
     upload_product_image,
@@ -172,16 +180,32 @@ async def upload_multiple_images(
 
 
 @router.put(
+    "/reorder",
+    response_model=list[ProductImageResponse],
+)
+def reorder_product_images_route(
+    product_id: int,
+    data: ProductImageReorder,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
+):
+    return reorder_images(
+        db,
+        product_id,
+        data.image_ids,
+    )
+
+
+@router.put(
     "/{image_id}",
     response_model=ProductImageResponse,
 )
 def update_image(
     product_id: int,
     image_id: int,
-    storage_path: str,
-    image_url: str,
-    display_order: int = 0,
-    is_primary: bool = False,
+    data: ProductImageUpdate,
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(
         get_current_admin
@@ -191,8 +215,6 @@ def update_image(
         db,
         product_id=product_id,
         image_id=image_id,
-        storage_path=storage_path,
-        image_url=image_url,
-        display_order=display_order,
-        is_primary=is_primary,
+        display_order=data.display_order,
+        is_primary=data.is_primary,
     )

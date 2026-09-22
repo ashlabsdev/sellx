@@ -10,6 +10,7 @@ import {
 } from 'vue-router'
 
 import ProductForm from '../../components/admin/ProductForm.vue'
+import ProductImageManager from '../../components/admin/ProductImageManager.vue'
 
 import {
   getCategories,
@@ -168,6 +169,11 @@ onMounted(loadPage)
       :is-submitting="isSubmitting"
       @submit="handleSubmit"
       @cancel="cancel"
+    />
+
+    <ProductImageManager
+      v-if="product"
+      :product-id="product.id"
     />
   </section>
 </template>
