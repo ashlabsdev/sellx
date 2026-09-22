@@ -30,6 +30,13 @@ import logo from '../assets/sellX4-logo.jpeg'
         <a href="#products">
           Products
         </a>
+
+        <RouterLink
+          to="/admin/login"
+          class="admin-link"
+        >
+          Admin
+        </RouterLink>
       </nav>
     </div>
   </header>

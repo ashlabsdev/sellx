@@ -9,6 +9,10 @@ import ProductDetailsView from '../views/public/ProductDetailsView.vue'
 import AdminLayout from '../layouts/AdminLayout.vue'
 import AdminLoginView from '../views/admin/AdminLoginView.vue'
 import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
+import AdminProductsView from '../views/admin/AdminProductsView.vue'
+
+import AdminProductCreateView from '../views/admin/AdminProductCreateView.vue'
+import AdminProductEditView from '../views/admin/AdminProductEditView.vue'
 
 import {
   getToken,
@@ -54,6 +58,24 @@ const router = createRouter({
           path: '',
           name: 'admin-dashboard',
           component: AdminDashboardView,
+        },
+
+        {
+          path: 'products',
+          name: 'admin-products',
+          component: AdminProductsView,
+        },
+
+        {
+          path: 'products/new',
+          name: 'admin-product-create',
+          component: AdminProductCreateView,
+        },
+
+        {
+          path: 'products/:id/edit',
+          name: 'admin-product-edit',
+          component: AdminProductEditView,
         },
       ],
     },

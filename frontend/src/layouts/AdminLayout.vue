@@ -90,13 +90,12 @@ onMounted(loadAdmin)
             Dashboard
           </RouterLink>
 
-          <span
-            class="admin-nav-link
-                   admin-nav-disabled"
+          <RouterLink
+            to="/admin/products"
+            class="admin-nav-link"
           >
             Products
-            <small>Day 14</small>
-          </span>
+          </RouterLink>
         </nav>
       </div>
 
@@ -207,20 +206,6 @@ onMounted(loadAdmin)
 .admin-nav-link.router-link-exact-active {
   background: #111;
   color: #fff;
-}
-
-.admin-nav-disabled {
-  cursor: default;
-  opacity: 0.45;
-}
-
-.admin-nav-disabled:hover {
-  background: transparent;
-  color: #555;
-}
-
-.admin-nav-disabled small {
-  font-size: 10px;
 }
 
 .marketplace-link {
