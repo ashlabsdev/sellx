@@ -16,7 +16,6 @@ const categories = ref<Category[]>([])
 
 const search = ref('')
 const selectedCategory = ref<number | undefined>()
-const selectedStatus = ref('')
 
 const isLoading = ref(false)
 const errorMessage = ref('')
@@ -27,9 +26,14 @@ async function loadProducts() {
 
   try {
     products.value = await getProducts({
-      search: search.value.trim() || undefined,
-      category_id: selectedCategory.value,
-      status: selectedStatus.value || undefined,
+      search:
+        search.value.trim() ||
+        undefined,
+
+      category_id:
+        selectedCategory.value,
+
+      status: 'active',
     })
   } catch {
     errorMessage.value = 'Unable to load products.'
@@ -53,7 +57,6 @@ async function applyFilters() {
 async function clearFilters() {
   search.value = ''
   selectedCategory.value = undefined
-  selectedStatus.value = ''
 
   await loadProducts()
 }
@@ -168,8 +171,7 @@ onMounted(async () => {
         <button
           v-if="
             search ||
-            selectedCategory ||
-            selectedStatus
+            selectedCategory
           "
           type="button"
           class="clear-button"
@@ -199,21 +201,7 @@ onMounted(async () => {
           >
             {{ category.name }}
           </option>
-        </select>
-
-        <select v-model="selectedStatus">
-          <option value="">
-            All Statuses
-          </option>
-
-          <option value="active">
-            Active
-          </option>
-
-          <option value="draft">
-            Draft
-          </option>
-        </select>
+        </select>      
 
         <button
           type="button"

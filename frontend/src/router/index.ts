@@ -6,6 +6,8 @@ import {
 import HomeView from '../views/public/HomeView.vue'
 import ProductDetailsView from '../views/public/ProductDetailsView.vue'
 
+import AdminCategoriesView from '../views/admin/AdminCategoriesView.vue'
+
 import AdminLayout from '../layouts/AdminLayout.vue'
 import AdminLoginView from '../views/admin/AdminLoginView.vue'
 import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
@@ -54,6 +56,11 @@ const router = createRouter({
       },
 
       children: [
+        {
+          path: 'categories',
+          name: 'admin-categories',
+          component: AdminCategoriesView,
+        },
         {
           path: '',
           name: 'admin-dashboard',

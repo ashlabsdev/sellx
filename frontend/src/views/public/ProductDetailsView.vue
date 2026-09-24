@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import {
+  computed,
+  onMounted,
+  ref,
+} from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
 import { getProduct } from '../../services/api'
@@ -9,6 +13,40 @@ import type { Product } from '../../types/product'
 const route = useRoute()
 
 const product = ref<Product | null>(null)
+
+  const selectedImageUrl =
+  ref<string | null>(null)
+
+
+const orderedImages = computed(() => {
+  if (!product.value) {
+    return []
+  }
+
+  return [...product.value.images]
+    .sort(
+      (a, b) =>
+        a.display_order -
+        b.display_order,
+    )
+})
+
+
+function selectInitialImage() {
+  if (!product.value) {
+    return
+  }
+
+  const primaryImage =
+    product.value.images.find(
+      (image) => image.is_primary,
+    )
+
+  selectedImageUrl.value =
+    primaryImage?.image_url ??
+    orderedImages.value[0]?.image_url ??
+    null
+}
 
 const isLoading = ref(true)
 const errorMessage = ref('')
@@ -20,7 +58,10 @@ async function loadProduct() {
   try {
     const productId = Number(route.params.id)
 
-    product.value = await getProduct(productId)
+    product.value =
+    await getProduct(productId)
+
+  selectInitialImage()
   } catch {
     errorMessage.value =
       'Unable to load this product.'
@@ -62,8 +103,44 @@ onMounted(loadProduct)
         v-else-if="product"
         class="product-details"
       >
-        <div class="product-image">
-          <span>No Image</span>
+        <div class="product-gallery">
+          <div class="product-image">
+            <img
+              v-if="selectedImageUrl"
+              :src="selectedImageUrl"
+              :alt="product.name"
+            />
+
+            <span v-else>
+              No Image
+            </span>
+          </div>
+
+          <div
+            v-if="orderedImages.length > 1"
+            class="thumbnail-list"
+          >
+            <button
+              v-for="image in orderedImages"
+              :key="image.id"
+              type="button"
+              class="thumbnail"
+              :class="{
+                active:
+                  selectedImageUrl ===
+                  image.image_url,
+              }"
+              @click="
+                selectedImageUrl =
+                  image.image_url
+              "
+            >
+              <img
+                :src="image.image_url"
+                :alt="product.name"
+              />
+            </button>
+          </div>
         </div>
 
         <div class="product-info">
@@ -134,6 +211,59 @@ onMounted(loadProduct)
 </template>
 
 <style scoped>
+
+.product-gallery {
+  min-width: 0;
+}
+
+.product-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #f3f3f3;
+  color: #999;
+}
+
+.product-image img {
+  display: block;
+  width: 100%;
+  height: 500px;
+  object-fit: contain;
+}
+
+.thumbnail-list {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.thumbnail {
+  flex: 0 0 78px;
+  width: 78px;
+  height: 78px;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 9px;
+  background: #f3f3f3;
+  cursor: pointer;
+}
+
+.thumbnail.active {
+  border-color: #111;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .details-page {
   min-height: calc(100vh - 72px);
   padding: 50px 20px 80px;
@@ -286,6 +416,14 @@ onMounted(loadProduct)
 
   .product-info h1 {
     font-size: 34px;
+  }
+  
+  .product-image {
+    min-height: 320px;
+  }
+
+  .product-image img {
+    height: 320px;
   }
 }
 </style>

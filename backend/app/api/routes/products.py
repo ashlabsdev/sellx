@@ -40,7 +40,7 @@ def get_products(
     ),
     search: str | None = None,
     category_id: int | None = None,
-    status: str | None = None,
+    status: str | None = "active",
     db: Session = Depends(get_db),
 ):
     return list_products(

@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.slug import generate_slug
@@ -95,12 +95,89 @@ def add_product(
 
     return create_product(db, product)
 
+def validate_product_for_publish(
+    product: Product,
+) -> None:
+    errors: list[str] = []
 
+    if not product.name.strip():
+        errors.append(
+            "Product name is required"
+        )
+
+    if product.price <= 0:
+        errors.append(
+            "Price must be greater than 0"
+        )
+
+    if not product.condition.strip():
+        errors.append(
+            "Condition is required"
+        )
+
+    if product.category is None:
+        errors.append(
+            "Category is required"
+        )
+    elif not product.category.is_active:
+        errors.append(
+            "Category must be active"
+        )
+
+    if (
+        not product.description
+        or not product.description.strip()
+    ):
+        errors.append(
+            "Description is required"
+        )
+
+    if (
+        not product.location
+        or not product.location.strip()
+    ):
+        errors.append(
+            "Location is required"
+        )
+
+    if (
+        not product.contact_phone
+        or not product.contact_phone.strip()
+    ):
+        errors.append(
+            "Contact phone is required"
+        )
+
+    if not product.images:
+        errors.append(
+            "At least one product image is required"
+        )
+
+    elif not any(
+        image.is_primary
+        for image in product.images
+    ):
+        errors.append(
+            "A primary product image is required"
+        )
+
+    if errors:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message":
+                    "Product cannot be published",
+                "errors": errors,
+            },
+        )
+    
 def edit_product(
     db: Session,
     product: Product,
     data: ProductUpdate,
 ) -> Product:
+    previous_status = product.status
+
     product.name = data.name
     product.category_id = data.category_id
     product.description = data.description
@@ -116,10 +193,24 @@ def edit_product(
         current_product_id=product.id,
     )
 
-    product.updated_at = datetime.now(timezone.utc)
+    product.updated_at = datetime.now(
+        timezone.utc
+    )
 
-    return update_product(db, product)
+    if (
+        data.status == "active"
+        and previous_status != "active"
+    ):
+        db.flush()
 
+        validate_product_for_publish(
+            product
+        )
+
+    return update_product(
+        db,
+        product,
+    )
 
 def remove_product(
     db: Session,

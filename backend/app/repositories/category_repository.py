@@ -1,3 +1,4 @@
+from sqlalchemy import asc
 from sqlalchemy.orm import Session
 
 from app.models.category import Category
@@ -6,8 +7,13 @@ from app.models.category import Category
 def get_categories(
     db: Session,
 ) -> list[Category]:
-    return db.query(Category).all()
-
+    return (
+        db.query(Category)
+        .order_by(
+            asc(Category.name)
+        )
+        .all()
+    )
 
 def get_category(
     db: Session,

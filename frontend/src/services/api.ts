@@ -15,11 +15,17 @@ import type {
 
 import type {
   Category,
+  CategoryCreate,
+  CategoryUpdate,
 } from '../types/category'
 
+// const API_BASE_URL = (
+//   import.meta.env.VITE_API_BASE_URL ||
+//   'http://127.0.0.1:8000'
+// ).replace(/\/+$/, '')
+
 const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL ||
-  'http://127.0.0.1:8000'
+'http://127.0.0.1:8000'
 ).replace(/\/+$/, '')
 
 export async function getProductImages(
@@ -146,15 +152,32 @@ async function request<T>(
       `API request failed with status ${response.status}`
 
     try {
-      const errorData = await response.json()
+      const errorData =
+        await response.json()
 
       if (
-        typeof errorData.detail === 'string'
+        typeof errorData.detail ===
+        'string'
       ) {
-        message = errorData.detail
+        message =
+          errorData.detail
+      } else if (
+        errorData.detail?.message
+      ) {
+        const details =
+          Array.isArray(
+            errorData.detail.errors,
+          )
+            ? errorData.detail.errors
+            : []
+
+        message = [
+          errorData.detail.message,
+          ...details,
+        ].join('\n')
       }
     } catch {
-      // Keep the default message.
+      // Keep fallback message.
     }
 
     throw new Error(message)
@@ -242,6 +265,49 @@ export async function getProduct(
 export async function getCategories() {
   return request<Category[]>(
     '/api/categories',
+  )
+}
+
+export async function createCategory(
+  data: CategoryCreate,
+) {
+  return request<Category>(
+    '/api/categories',
+    {
+      method: 'POST',
+      body: JSON.stringify(data),
+    },
+    true,
+  )
+}
+
+
+export async function updateCategory(
+  categoryId: number,
+  data: CategoryUpdate,
+) {
+  return request<Category>(
+    `/api/categories/${categoryId}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    },
+    true,
+  )
+}
+
+
+export async function deleteCategory(
+  categoryId: number,
+) {
+  return request<{
+    message: string
+  }>(
+    `/api/categories/${categoryId}`,
+    {
+      method: 'DELETE',
+    },
+    true,
   )
 }
 

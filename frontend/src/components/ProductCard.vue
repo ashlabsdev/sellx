@@ -14,7 +14,21 @@ defineProps<{
     class="product-card"
   >
     <div class="product-image">
-      <span>No Image</span>
+      <img
+        v-if="product.images?.length"
+        :src="
+          product.images.find(
+            (image) => image.is_primary,
+          )?.image_url ??
+          product.images[0]?.image_url
+        "
+        :alt="product.name"
+        loading="lazy"
+      />
+
+      <span v-else>
+        No Image
+      </span>
     </div>
 
     <div class="product-content">
@@ -48,6 +62,23 @@ defineProps<{
 </template>
 
 <style scoped>
+
+.product-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 230px;
+  overflow: hidden;
+  background: #f5f5f5;
+  color: #999;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .product-card {
   display: block;
   overflow: hidden;

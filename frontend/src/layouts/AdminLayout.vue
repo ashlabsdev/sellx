@@ -96,6 +96,13 @@ onMounted(loadAdmin)
           >
             Products
           </RouterLink>
+
+          <RouterLink
+            to="/admin/categories"
+            class="admin-nav-link"
+          >
+            Categories
+          </RouterLink>
         </nav>
       </div>
 
