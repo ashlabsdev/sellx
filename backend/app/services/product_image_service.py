@@ -140,12 +140,18 @@ def add_product_image(
             detail="Product not found",
         )
 
-    if is_primary:
-        existing_images = get_product_images(
-            db,
-            product_id,
-        )
+    existing_images = get_product_images(
+        db,
+        product_id,
+    )
 
+    # First image automatically becomes primary.
+    if not existing_images:
+        is_primary = True
+
+    # If another image is explicitly selected
+    # as primary, unset the previous primary.
+    elif is_primary:
         for image in existing_images:
             image.is_primary = False
 

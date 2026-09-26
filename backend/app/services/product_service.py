@@ -100,7 +100,10 @@ def validate_product_for_publish(
 ) -> None:
     errors: list[str] = []
 
-    if not product.name.strip():
+    if (
+        not product.name
+        or not product.name.strip()
+    ):
         errors.append(
             "Product name is required"
         )
@@ -110,7 +113,10 @@ def validate_product_for_publish(
             "Price must be greater than 0"
         )
 
-    if not product.condition.strip():
+    if (
+        not product.condition
+        or not product.condition.strip()
+    ):
         errors.append(
             "Condition is required"
         )
@@ -177,6 +183,18 @@ def edit_product(
     data: ProductUpdate,
 ) -> Product:
     previous_status = product.status
+
+    allowed_statuses = {
+        "draft",
+        "active",
+        "sold",
+    }
+
+    if data.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid product status",
+        )
 
     product.name = data.name
     product.category_id = data.category_id
