@@ -86,3 +86,93 @@ def delete_product_image_file(
             status_code=500,
             detail="Failed to delete image from storage",
         ) from exc
+
+# 18.11 - Download an existing image from Supabase
+def download_product_image_file(
+    storage_path: str,
+) -> bytes:
+    try:
+        file_bytes = (
+            supabase.storage.from_(
+                SUPABASE_STORAGE_BUCKET
+            ).download(
+                storage_path
+            )
+        )
+
+        if not file_bytes:
+            raise HTTPException(
+                status_code=404,
+                detail=(
+                    "Product image file "
+                    "was not found"
+                ),
+            )
+
+        return file_bytes
+
+    except HTTPException:
+        raise
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Failed to download image "
+                "from storage"
+            ),
+        ) from exc
+
+# 18.12 — Upload processed WebP
+def upload_processed_product_image(
+    product_id: int,
+    image_bytes: bytes,
+) -> tuple[str, str]:
+    if not image_bytes:
+        raise HTTPException(
+            status_code=400,
+            detail="Processed image is empty",
+        )
+
+    filename = (
+        f"{uuid.uuid4()}.webp"
+    )
+
+    storage_path = (
+        f"products/{product_id}/"
+        f"{filename}"
+    )
+
+    try:
+        supabase.storage.from_(
+            SUPABASE_STORAGE_BUCKET
+        ).upload(
+            path=storage_path,
+            file=image_bytes,
+            file_options={
+                "content-type":
+                    "image/webp",
+            },
+        )
+
+        image_url = (
+            supabase.storage.from_(
+                SUPABASE_STORAGE_BUCKET
+            ).get_public_url(
+                storage_path
+            )
+        )
+
+        return (
+            storage_path,
+            image_url,
+        )
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Failed to upload "
+                "processed image"
+            ),
+        ) from exc

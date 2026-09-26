@@ -218,3 +218,56 @@ def update_image(
         display_order=data.display_order,
         is_primary=data.is_primary,
     )
+
+# 18.14 — Preview API endpoint
+from app.schemas.image_processing import (
+    ImageProcessRequest,
+    ImageProcessResponse,
+    ImageSaveRequest,
+)
+
+from app.services.image_editor_service import (
+    create_image_preview,  save_edited_image,
+)
+
+@router.post(
+    "/{image_id}/preview-edit",
+    response_model=ImageProcessResponse,
+)
+def preview_image_edit(
+    product_id: int,
+    image_id: int,
+    data: ImageProcessRequest,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
+):
+    return create_image_preview(
+        db,
+        product_id,
+        image_id,
+        data.background,
+    )
+
+
+# 18.17 — Save endpoint
+@router.post(
+    "/{image_id}/save-edit",
+    response_model=ProductImageResponse,
+)
+def save_image_edit(
+    product_id: int,
+    image_id: int,
+    data: ImageSaveRequest,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(
+        get_current_admin
+    ),
+):
+    return save_edited_image(
+        db,
+        product_id,
+        image_id,
+        data.background,
+    )
