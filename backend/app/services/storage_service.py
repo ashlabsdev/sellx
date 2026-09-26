@@ -176,3 +176,49 @@ def upload_processed_product_image(
                 "processed image"
             ),
         ) from exc
+
+def upload_processed_product_image(
+    product_id: int,
+    image_bytes: bytes,
+) -> tuple[str, str]:
+
+    filename = (
+        f"{uuid.uuid4()}.webp"
+    )
+
+    storage_path = (
+        f"products/{product_id}/{filename}"
+    )
+
+    try:
+        supabase.storage.from_(
+            SUPABASE_STORAGE_BUCKET
+        ).upload(
+            path=storage_path,
+            file=image_bytes,
+            file_options={
+                "content-type": "image/webp",
+            },
+        )
+
+        image_url = (
+            supabase.storage.from_(
+                SUPABASE_STORAGE_BUCKET
+            ).get_public_url(
+                storage_path
+            )
+        )
+
+        return (
+            storage_path,
+            image_url,
+        )
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Failed to upload "
+                "processed image"
+            ),
+        ) from exc

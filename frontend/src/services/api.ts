@@ -13,6 +13,9 @@ import type {
   ProductCreate,
   ProductImage,
   ProductUpdate,
+  ImageBackground,
+  ImageCrop,
+  ImageRotation,
 } from '../types/product'
 
 import type {
@@ -111,7 +114,11 @@ export async function previewProductImageEdit(
 export async function saveProductImageEdit(
   productId: number,
   imageId: number,
-  data: ImageEditRequest,
+  data: {
+    background: ImageBackground
+    rotation: ImageRotation
+    crop: ImageCrop | null
+  },
 ) {
   return request<ProductImage>(
     `/api/products/${productId}/images/${imageId}/save-edit`,

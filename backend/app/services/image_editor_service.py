@@ -26,6 +26,33 @@ from app.repositories.product_image_repository import (
     update_product_image,
 )
 
+from app.core.config import (
+    SUPABASE_STORAGE_BUCKET,
+)
+
+from app.core.supabase import supabase
+
+def get_storage_image_bytes(
+    storage_path: str,
+) -> bytes:
+    try:
+        return (
+            supabase.storage.from_(
+                SUPABASE_STORAGE_BUCKET
+            ).download(
+                storage_path
+            )
+        )
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Failed to load image "
+                "from storage"
+            ),
+        ) from exc
+
 def create_image_preview(
     db: Session,
     product_id: int,
@@ -83,21 +110,20 @@ def save_edited_image(
     background: str,
     rotation: int = 0,
     crop: dict | None = None,
-) -> ProductImage:
+):
     image = get_product_image_by_id(
         db,
         product_id,
         image_id,
     )
 
-    source_storage_path = (
-        image.original_storage_path
-        or image.storage_path
+    old_storage_path = (
+        image.storage_path
     )
 
     original_bytes = (
-        download_product_image_file(
-            source_storage_path
+        get_storage_image_bytes(
+            old_storage_path
         )
     )
 
@@ -105,7 +131,7 @@ def save_edited_image(
         processed_bytes = (
             process_product_image(
                 original_bytes,
-                background,
+                background=background,
                 rotation=rotation,
                 crop=crop,
             )
@@ -117,56 +143,50 @@ def save_edited_image(
             detail=str(exc),
         ) from exc
 
-    new_storage_path = None
+    (
+        new_storage_path,
+        new_image_url,
+    ) = upload_processed_product_image(
+        product_id,
+        processed_bytes,
+    )
+
+    image.storage_path = (
+        new_storage_path
+    )
+
+    image.image_url = (
+        new_image_url
+    )
 
     try:
-        (
-            new_storage_path,
-            new_image_url,
-        ) = upload_processed_product_image(
-            product_id,
-            processed_bytes,
-        )
-
-        image.storage_path = (
-            new_storage_path
-        )
-
-        image.image_url = (
-            new_image_url
-        )
-
-        updated_image = (
-            update_product_image(
-                db,
-                image,
-            )
-        )
+        db.commit()
+        db.refresh(image)
 
     except Exception:
-        # If upload succeeded but the DB
-        # update failed, don't leave an
-        # orphaned processed file.
-        if new_storage_path:
-            try:
-                delete_product_image_file(
-                    new_storage_path
-                )
-            except Exception:
-                pass
+        db.rollback()
+
+        # Clean up newly uploaded file because
+        # the DB update failed.
+        try:
+            delete_product_image_file(
+                new_storage_path
+            )
+        except Exception:
+            pass
 
         raise
 
-    # Delete old file only AFTER the new
-    # file and DB update succeeded.
+    # Delete old image only AFTER the DB
+    # successfully points to the new image.
     try:
         delete_product_image_file(
             old_storage_path
         )
-    except HTTPException:
+    except Exception:
         # The new image is already valid.
-        # Don't destroy the successful edit
+        # Don't break the save operation only
         # because old-file cleanup failed.
         pass
 
-    return updated_image
+    return image

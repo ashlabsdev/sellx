@@ -18,6 +18,7 @@ import {
 import {
   getProductImages,
   previewProductImageEdit,
+  saveProductImageEdit,
 } from '../../services/api'
 
 import type {
@@ -31,6 +32,10 @@ import type {
 const route = useRoute()
 const router = useRouter()
 
+const isSaving = ref(false)
+
+const saveSuccess =
+  ref(false)
 
 const productId = Number(
   route.params.productId,
@@ -40,6 +45,59 @@ const imageId = Number(
   route.params.imageId,
 )
 
+async function saveEditedImage() {
+  if (!image.value) {
+    return
+  }
+
+  if (!preview.value) {
+    errorMessage.value =
+      'Generate a preview before saving.'
+
+    return
+  }
+
+  isSaving.value = true
+  errorMessage.value = ''
+  saveSuccess.value = false
+
+  try {
+    const updatedImage =
+      await saveProductImageEdit(
+        productId,
+        image.value.id,
+        {
+          background:
+            background.value,
+
+          rotation:
+            rotation.value,
+
+          crop:
+            crop.value,
+        },
+      )
+
+    image.value = updatedImage
+
+    preview.value = null
+    crop.value = null
+    rotation.value = 0
+
+    saveSuccess.value = true
+
+  } catch (error) {
+    console.error(error)
+
+    errorMessage.value =
+      error instanceof Error
+        ? error.message
+        : 'Failed to save edited image.'
+
+  } finally {
+    isSaving.value = false
+  }
+}
 
 const image =
   ref<ProductImage | null>(null)
@@ -153,6 +211,7 @@ function applyCrop() {
     width,
     height,
   }
+  invalidatePreview()
 
   isCropMode.value = false
 
@@ -167,7 +226,7 @@ function cancelCrop() {
 
 function clearCrop() {
   crop.value = null
-  preview.value = null
+  invalidatePreview()
 }
 
 function destroyCropper() {
@@ -268,6 +327,18 @@ async function generatePreview() {
   }
 }
 
+function invalidatePreview() {
+  preview.value = null
+  saveSuccess.value = false
+}
+
+function setBackground(
+  value: ImageBackground,
+) {
+  background.value = value
+
+  invalidatePreview()
+}
 
 function rotateLeft() {
   const next =
@@ -281,7 +352,7 @@ function rotateLeft() {
     ) as ImageRotation
 
   crop.value = null
-  preview.value = null
+  invalidatePreview()
 
   destroyCropper()
   isCropMode.value = false
@@ -295,7 +366,7 @@ function rotateRight() {
     ) as ImageRotation
 
   crop.value = null
-  preview.value = null
+  invalidatePreview()
 
   destroyCropper()
   isCropMode.value = false
@@ -325,6 +396,9 @@ function goBack() {
   })
 }
 
+onBeforeUnmount(() => {
+  destroyCropper()
+})
 
 onMounted(loadImage)
 </script>
@@ -486,10 +560,7 @@ onMounted(loadImage)
                 selected:
                   background === 'white',
               }"
-              @click="
-                background = 'white';
-                preview = null
-              "
+              @click="setBackground('white')"
             >
               <span
                 class="color-circle white"
@@ -505,10 +576,7 @@ onMounted(loadImage)
                 selected:
                   background === 'grey',
               }"
-              @click="
-                background = 'grey';
-                preview = null
-              "
+              @click="setBackground('grey')"
             >
               <span
                 class="color-circle grey"
@@ -524,10 +592,7 @@ onMounted(loadImage)
                 selected:
                   background === 'black',
               }"
-              @click="
-                background = 'black';
-                preview = null
-              "
+              @click="setBackground('black')"
             >
               <span
                 class="color-circle black"
@@ -664,7 +729,7 @@ onMounted(loadImage)
             class="reset-button"
             :disabled="
               isProcessing ||
-              isCropMode
+              isSaving
             "
             @click="resetEditor"
           >
@@ -676,6 +741,7 @@ onMounted(loadImage)
             class="preview-button"
             :disabled="
               isProcessing ||
+              isSaving ||
               isCropMode
             "
             @click="generatePreview"
@@ -683,20 +749,90 @@ onMounted(loadImage)
             {{
               isProcessing
                 ? 'Processing...'
-                : 'Generate preview'
+                : 'Generate Preview'
+            }}
+          </button>
+
+          <button
+            type="button"
+            class="save-image-button"
+            :disabled="
+              !preview ||
+              isProcessing ||
+              isSaving ||
+              isCropMode
+            "
+            @click="saveEditedImage"
+          >
+            {{
+              isSaving
+                ? 'Saving...'
+                : 'Save Edited Image'
             }}
           </button>
         </div>
+
+        <div
+          v-if="saveSuccess"
+          class="save-success"
+        >
+          <strong>
+            Image saved successfully.
+          </strong>
+
+          <span>
+            The edited image is now being
+            used by this product.
+          </span>
+        </div>
       </aside>
     </div>
-    onBeforeUnmount(() => {
-      destroyCropper()
-    })
   </section>
 </template>
 
 
 <style scoped>
+.save-success {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  border-radius: 10px;
+
+  background: #eef8f1;
+}
+
+.save-success strong {
+  font-size: 0.9rem;
+}
+
+.save-success span {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.save-image-button {
+  border: 0;
+  border-radius: 10px;
+
+  padding: 0.8rem 1.1rem;
+
+  font-weight: 700;
+
+  background: #222938;
+  color: #ffffff;
+
+  cursor: pointer;
+}
+
+.save-image-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .crop-button {
   width: 100%;
   border: 1px solid #dfe3ea;
