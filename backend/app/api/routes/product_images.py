@@ -220,14 +220,14 @@ def update_image(
     )
 
 # 18.14 — Preview API endpoint
-from app.schemas.image_processing import (
-    ImageProcessRequest,
-    ImageProcessResponse,
-    ImageSaveRequest,
-)
-
 from app.services.image_editor_service import (
     create_image_preview,  save_edited_image,
+)
+
+from app.schemas.image_processing import (
+    ImageEditRequest,
+    ImageProcessResponse,
+    ImageSaveRequest,
 )
 
 @router.post(
@@ -237,19 +237,26 @@ from app.services.image_editor_service import (
 def preview_image_edit(
     product_id: int,
     image_id: int,
-    data: ImageProcessRequest,
+    data: ImageEditRequest,
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(
         get_current_admin
     ),
 ):
+    crop = (
+        data.crop.model_dump()
+        if data.crop
+        else None
+    )
+
     return create_image_preview(
         db,
         product_id,
         image_id,
-        data.background,
+        background=data.background,
+        rotation=data.rotation,
+        crop=crop,
     )
-
 
 # 18.17 — Save endpoint
 @router.post(
@@ -265,9 +272,17 @@ def save_image_edit(
         get_current_admin
     ),
 ):
+    crop = (
+        data.crop.model_dump()
+        if data.crop
+        else None
+    )
+
     return save_edited_image(
         db,
         product_id,
         image_id,
-        data.background,
+        background=data.background,
+        rotation=data.rotation,
+        crop=crop,
     )

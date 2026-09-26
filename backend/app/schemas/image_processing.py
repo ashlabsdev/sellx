@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 BackgroundColor = Literal[
@@ -10,8 +10,25 @@ BackgroundColor = Literal[
 ]
 
 
-class ImageProcessRequest(BaseModel):
+class CropData(BaseModel):
+    x: int = Field(ge=0)
+    y: int = Field(ge=0)
+
+    width: int = Field(gt=0)
+    height: int = Field(gt=0)
+
+
+class ImageEditRequest(BaseModel):
     background: BackgroundColor
+
+    rotation: Literal[
+        0,
+        90,
+        180,
+        270,
+    ] = 0
+
+    crop: CropData | None = None
 
 
 class ImageProcessResponse(BaseModel):
@@ -19,5 +36,5 @@ class ImageProcessResponse(BaseModel):
     content_type: str
 
 
-class ImageSaveRequest(BaseModel):
-    background: BackgroundColor
+class ImageSaveRequest(ImageEditRequest):
+    pass

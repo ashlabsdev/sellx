@@ -31,6 +31,8 @@ def create_image_preview(
     product_id: int,
     image_id: int,
     background: str,
+    rotation: int = 0,
+    crop: dict | None = None,
 ) -> dict[str, str]:
     image = get_product_image_by_id(
         db,
@@ -49,6 +51,8 @@ def create_image_preview(
             process_product_image(
                 original_bytes,
                 background,
+                rotation=rotation,
+                crop=crop,
             )
         )
 
@@ -77,6 +81,8 @@ def save_edited_image(
     product_id: int,
     image_id: int,
     background: str,
+    rotation: int = 0,
+    crop: dict | None = None,
 ) -> ProductImage:
     image = get_product_image_by_id(
         db,
@@ -84,13 +90,14 @@ def save_edited_image(
         image_id,
     )
 
-    old_storage_path = (
-        image.storage_path
+    source_storage_path = (
+        image.original_storage_path
+        or image.storage_path
     )
 
     original_bytes = (
         download_product_image_file(
-            old_storage_path
+            source_storage_path
         )
     )
 
@@ -99,6 +106,8 @@ def save_edited_image(
             process_product_image(
                 original_bytes,
                 background,
+                rotation=rotation,
+                crop=crop,
             )
         )
 

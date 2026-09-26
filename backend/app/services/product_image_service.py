@@ -128,6 +128,7 @@ def add_product_image(
     image_url: str,
     display_order: int,
     is_primary: bool,
+    original_storage_path: str | None = None,
 ) -> ProductImage:
     product = get_product(
         db,
@@ -160,6 +161,10 @@ def add_product_image(
     image = ProductImage(
         product_id=product_id,
         storage_path=storage_path,
+        original_storage_path=(
+            original_storage_path
+            or storage_path
+        ),
         image_url=image_url,
         display_order=display_order,
         is_primary=is_primary,

@@ -52,3 +52,11 @@ create table if not exists public.admins (
 
 create index if not exists ix_admins_email
 on public.admins (email);
+
+-- 18.C changes
+ALTER TABLE product_images
+ADD COLUMN original_storage_path TEXT;
+
+UPDATE product_images
+SET original_storage_path = storage_path
+WHERE original_storage_path IS NULL;

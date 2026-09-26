@@ -12,10 +12,17 @@ class ProductImageReorder(BaseModel):
 
 class ProductImageResponse(BaseModel):
     id: int
+
     storage_path: str
+
+    original_storage_path: str | None = None
+
     image_url: str
+
     display_order: int | None = None
+
     is_primary: bool | None = None
+
     created_at: datetime
 
     model_config = {

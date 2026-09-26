@@ -52,3 +52,8 @@ class ProductImage(Base):
         "Product",
         back_populates="images",
     )
+
+    original_storage_path: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True,
+    )
