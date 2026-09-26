@@ -16,6 +16,8 @@ import AdminProductsView from '../views/admin/AdminProductsView.vue'
 import AdminProductCreateView from '../views/admin/AdminProductCreateView.vue'
 import AdminProductEditView from '../views/admin/AdminProductEditView.vue'
 
+import AdminImageEditorView from '../views/admin/AdminImageEditorView.vue'
+
 import {
   getToken,
 } from '../services/auth'
@@ -56,6 +58,11 @@ const router = createRouter({
       },
 
       children: [
+        {
+          path: 'products/:productId/images/:imageId/edit',
+          name: 'admin-image-editor',
+          component: AdminImageEditorView,
+        },
         {
           path: 'categories',
           name: 'admin-categories',

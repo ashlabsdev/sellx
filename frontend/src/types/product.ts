@@ -58,3 +58,36 @@ export interface ProductUpdate {
   contact_phone?: string | null
   status: string
 }
+
+export type ImageBackground =
+  | 'white'
+  | 'grey'
+  | 'black'
+
+
+export type ImageRotation =
+  | 0
+  | 90
+  | 180
+  | 270
+
+
+export interface ImageCrop {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+
+export interface ImageEditRequest {
+  background: ImageBackground
+  rotation: ImageRotation
+  crop: ImageCrop | null
+}
+
+
+export interface ImageProcessResponse {
+  image_base64: string
+  content_type: string
+}

@@ -7,6 +7,10 @@ import {
 } from 'vue'
 
 import {
+  useRouter,
+} from 'vue-router'
+
+import {
   deleteProductImage,
   getProductImages,
   reorderProductImages,
@@ -32,6 +36,24 @@ const deletingImageId =
 const props = defineProps<{
   productId: number
 }>()
+
+const router = useRouter()
+
+function editImage(
+  image: ProductImage,
+) {
+  router.push({
+    name: 'admin-image-editor',
+
+    params: {
+      productId:
+        props.productId.toString(),
+
+      imageId:
+        image.id.toString(),
+    },
+  })
+}
 
 const cameraInput =
   ref<HTMLInputElement | null>(null)
@@ -670,6 +692,14 @@ onBeforeUnmount(() => {
             >
               Primary
             </span>
+
+            <button
+              type="button"
+              class="edit-image-button"
+              @click="editImage(image)"
+            >
+              Edit image
+            </button>
           </div>
 
           <div class="image-details">
@@ -823,6 +853,26 @@ onBeforeUnmount(() => {
 
 
 <style scoped>
+.edit-image-button {
+  width: 100%;
+  border: 1px solid #d7dce5;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  background: #ffffff;
+  color: #202735;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.edit-image-button:hover {
+  background: #f7f8fa;
+  border-color: #aeb6c4;
+  transform: translateY(-1px);
+}
 
 .order-actions {
   display: grid;

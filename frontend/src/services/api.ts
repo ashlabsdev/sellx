@@ -7,6 +7,8 @@ import type {
 import { getToken } from './auth'
 
 import type {
+  ImageEditRequest,
+  ImageProcessResponse,
   Product,
   ProductCreate,
   ProductImage,
@@ -91,6 +93,35 @@ export async function updateProductImage(
   )
 }
 
+export async function previewProductImageEdit(
+  productId: number,
+  imageId: number,
+  data: ImageEditRequest,
+) {
+  return request<ImageProcessResponse>(
+    `/api/products/${productId}/images/${imageId}/preview-edit`,
+    {
+      method: 'POST',
+      body: JSON.stringify(data),
+    },
+    true,
+  )
+}
+
+export async function saveProductImageEdit(
+  productId: number,
+  imageId: number,
+  data: ImageEditRequest,
+) {
+  return request<ProductImage>(
+    `/api/products/${productId}/images/${imageId}/save-edit`,
+    {
+      method: 'POST',
+      body: JSON.stringify(data),
+    },
+    true,
+  )
+}
 
 export async function deleteProductImage(
   productId: number,
