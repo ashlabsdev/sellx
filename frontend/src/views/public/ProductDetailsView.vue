@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import {
+  buildWhatsAppUrl,
+} from '../../utils/whatsapp'
+
+import {
   computed,
   onMounted,
   ref,
@@ -12,11 +16,63 @@ import type { Product } from '../../types/product'
 
 const route = useRoute()
 
+const shareMessage = ref('')
+
+async function shareProduct() {
+  if (!product.value) {
+    return
+  }
+
+  shareMessage.value = ''
+
+  const shareData = {
+    title: product.value.name,
+    text:
+      `${product.value.name} on SellX`,
+    url: window.location.href,
+  }
+
+  try {
+    if (navigator.share) {
+      await navigator.share(
+        shareData,
+      )
+
+      return
+    }
+
+    await navigator.clipboard.writeText(
+      window.location.href,
+    )
+
+    shareMessage.value =
+      'Product link copied.'
+  } catch (error) {
+    console.error(
+      'Unable to share product:',
+      error,
+    )
+  }
+}
+
 const product = ref<Product | null>(null)
 
-  const selectedImageUrl =
-  ref<string | null>(null)
+const selectedImageUrl = ref<string | null>(null)
 
+const whatsappUrl = computed(() => {
+  if (
+    !product.value ||
+    !product.value.contact_phone
+  ) {
+    return null
+  }
+
+  return buildWhatsAppUrl(
+    product.value.contact_phone,
+    product.value.name,
+    window.location.href,
+  )
+})
 
 const orderedImages = computed(() => {
   if (!product.value) {
@@ -188,18 +244,40 @@ onMounted(loadProduct)
               :href="`tel:${product.contact_phone}`"
               class="primary-button"
             >
-              Contact Seller
+              Call
             </a>
 
-            <a
-              v-if="product.contact_phone"
-              :href="`https://wa.me/${product.contact_phone}`"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="secondary-button"
-            >
-              WhatsApp
-            </a>
+           <a
+            v-if="whatsappUrl"
+            :href="whatsappUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="secondary-button"
+          >
+            WhatsApp
+          </a>
+
+          <div
+            v-else
+            class="contact-unavailable"
+          >
+            Seller contact is unavailable.
+          </div>
+
+          <button
+            type="button"
+            class="share-button"
+            @click="shareProduct"
+          >
+            Share
+          </button>
+
+          <p
+            v-if="shareMessage"
+            class="share-message"
+          >
+            {{ shareMessage }}
+          </p>
           </div>
 
         </div>
@@ -211,6 +289,28 @@ onMounted(loadProduct)
 </template>
 
 <style scoped>
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 20px;
+  border-radius: 9px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.share-button:hover {
+  background: #0026ff;
+  color: #fff;
+  border-color: #fff;
+}
+
+.share-message {
+  margin-top: 0.6rem;
+  color: #0026ff;
+  font-size: 0.9rem;
+}
 
 .product-gallery {
   min-width: 0;
@@ -382,13 +482,26 @@ onMounted(loadProduct)
 }
 
 .primary-button {
-  background: #111;
-  color: #fff;
+  background: #fff;
+  color: #000;
+  border: 1px solid #000;
 }
 
 .secondary-button {
-  border: 1px solid #ddd;
+  border: 1px solid #000;
   background: #fff;
+  color: #111;
+}
+
+.primary-button:hover {
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+}
+
+.secondary-button:hover {
+  border: 1px solid #000;
+  background: #00ff84;
   color: #111;
 }
 

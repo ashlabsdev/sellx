@@ -55,7 +55,7 @@ defineProps<{
         v-if="product.location"
         class="product-location"
       >
-        {{ product.location }}
+        📍 {{ product.location }}
       </div>
     </div>
   </RouterLink>
