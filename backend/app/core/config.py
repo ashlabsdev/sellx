@@ -38,7 +38,7 @@ JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(
 
 FRONTEND_URL = os.getenv(
     "FRONTEND_URL",
-    "http://localhost:5173",
+    "https://sellx-swart.vercel.app",
 )
 
 if not DATABASE_URL:
