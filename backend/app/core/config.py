@@ -36,6 +36,11 @@ JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(
 )
 
 
+FRONTEND_URL = os.getenv(
+    "FRONTEND_URL",
+    "http://localhost:5173",
+)
+
 if not DATABASE_URL:
     raise RuntimeError(
         "DATABASE_URL is not configured"

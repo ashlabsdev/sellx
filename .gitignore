@@ -3,10 +3,6 @@ backend/.venv/
 __pycache__/
 *.py[cod]
 
-# Environment
-.env
-.env.*
-
 # Node
 frontend/node_modules/
 frontend/dist/
@@ -18,3 +14,43 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Testing / caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local test images
+test_product.jpeg
