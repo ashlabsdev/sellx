@@ -50,7 +50,7 @@ python-slugify==9.0.0
 PyYAML==6.0.3
 realtime==2.31.0
 referencing==0.37.0
-rembg==2.0.85
+rembg[cpu]==2.0.85
 requests==2.34.2
 rpds-py==2026.6.3
 scikit-image==0.26.0
