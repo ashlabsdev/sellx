@@ -1,7 +1,21 @@
+from functools import lru_cache
 from io import BytesIO
 
 from PIL import Image
-from rembg import remove
+from rembg import new_session, remove
+
+
+MAX_PROCESSING_SIZE = (
+    1600,
+    1600,
+)
+
+
+@lru_cache(maxsize=1)
+def get_rembg_session():
+    return new_session(
+        "u2netp"
+    )
 
 
 def remove_image_background(
@@ -19,8 +33,16 @@ def remove_image_background(
 
         input_image.load()
 
+        input_image.thumbnail(
+            MAX_PROCESSING_SIZE,
+            Image.Resampling.LANCZOS,
+        )
+
+        session = get_rembg_session()
+
         result = remove(
-            input_image
+            input_image,
+            session=session,
         )
 
         if not isinstance(
